@@ -19,11 +19,10 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  #Sesuaikan dengan nama properti
   - job_name: ""
 
     # metrics_path defaults to '/metrics'
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ['10.41.51.219:9100'] 
+      - targets: ['x.x.x.x:9100'] #IP Docker Network Gateway 
