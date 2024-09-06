@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     image: prom/prometheus:latest
     ports:
-      - "10.2.1.20:9090:9090"
+      - "x.x.x.x:9090:9090" #Forward to IP
     volumes:
       - prometheus_data:/etc/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -13,7 +13,7 @@ services:
       - '--storage.tsdb.retention.time=60d'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
+#      - '--web.console.templates=/usr/share/prometheus/consoles'
     logging:
       driver: "json-file"
       options:
@@ -22,4 +22,12 @@ services:
         max-file: "5"
     networks:
       default:
-        ipv4_address: 100.21.90.3
+        ipv4_address: x.x.x.x #IP Docker Network
+
+volumes:
+  prometheus_data:
+
+networks:
+  default:
+    name: xxx #Docker Network Name
+    external: true
