@@ -1,0 +1,5 @@
+#Lihat status jail
+fail2ban-client status <nama jail/filter>
+
+#Unbanned IP
+fail2ban-client set sshd-no-pubkey unbanip <IP>

@@ -1,0 +1,13 @@
+[nama filter]
+# Aktif atau tidak
+enabled = true
+# Port destinasi
+port = 6699
+# nama filter
+filter = sshd-no-pubkey
+#path log
+logpath = /var/log/auth.log
+#berapa kali percobaan
+maxretry = 2
+#waktu banned 1m, 1h, 1d, -1 (untuk permanen)
+bantime = -1
