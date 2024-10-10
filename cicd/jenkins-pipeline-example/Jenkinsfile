@@ -6,11 +6,10 @@ pipeline {
     }
     
     environment {
-        TEXT_SUCCESS_BUILD = "Build berhasil untuk image: ${IMAGE_NAME}"
-        TEXT_FAILURE_BUILD = "Build gagal untuk image: ${IMAGE_NAME}"
-        IMAGE_NAME = 'python-api'
-        SONAR_HOST_URL = 'http://sonarqube:9000'
-        SONAR_TOKEN = credentials('sonarqube-id')
+        IMAGE_NAME = 'rafly28/python-api'
+        SONAR_HOST_URL = 'https://sonarqube.aksescloud.com/'
+        SONAR_TOKEN = credentials('jenkins2sonarqube')
+        SONAR_TOOL = tool 'sonarqube-tools'
     }
     
     stages {
@@ -23,53 +22,55 @@ pipeline {
             }
         }
         
-    stage('SonarQube Analysis') {
-        environment {
-            scannerHome = tool 'sonarqube-tools'
+        stage('Get Git Hash') {
+            steps {
+                script {
+                    def gitHashOutput = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Raw Git Hash Output: ${gitHashOutput}"
+                    writeFile file: 'git_hash.txt', text: gitHashOutput
+                }
             }
-        steps {
-                withSonarQubeEnv(credentialsId: 'sonarqube-id', installationName: 'sonarqube-server') {
+        }
+        
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv(credentialsId: 'jenkins2sonarqube', installationName: 'sonarqube-server') {
                     sh """
-                    ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=test-sonarqube \
-                        -Dsonar.projectName="test-sonarqube" \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=$SONAR_HOST_URL \
-                        -Dsonar.token=$SONAR_TOKEN
+                    ${SONAR_TOOL}/bin/sonar-scanner \
+                        -D sonar.projectKey=python-fastapi \
+                        -D sonar.projectName="python-fastapi" \
+                        -D sonar.exclusions=**/env/** \
+                        -D sonar.python.version=3 \
+                        -D sonar.language=python \
+                        -D sonar.host.url=${SONAR_HOST_URL} \
+                        -D sonar.token=${SONAR_TOKEN}
                     """
                 }
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${IMAGE_NAME}")
+                    def gitHash = readFile('git_hash.txt').trim()
+                    docker.build("${IMAGE_NAME}:${gitHash}", ".")
+                }
+            }
+        }
+
+        stage('Delete Docker Image') {
+            steps {
+                script {
+                    def gitHash = readFile('git_hash.txt').trim()
+                    sh "docker rmi ${IMAGE_NAME}:${gitHash} || true"
                 }
             }
         }
     }
-    
+
     post {
         always {
-            script {
-                sh 'docker rmi ${IMAGE_NAME} || true'
-            }
-        }
-        
-        success {
-            script {
-                withCredentials([string(credentialsId: 'telegram_bot_id', variable: 'TOKEN'), string(credentialsId: 'telegram_chat_id', variable: 'CHAT_ID')]) {
-                    sh ''' curl -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d "chat_id=$CHAT_ID&text=$TEXT_SUCCESS_BUILD" '''
-                }
-            }
-        }
-        failure {
-            script {
-                withCredentials([string(credentialsId: 'telegram_bot_id', variable: 'TOKEN'), string(credentialsId: 'telegram_chat_id', variable: 'CHAT_ID')]) {
-                    sh ''' curl -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d "chat_id=$CHAT_ID&text=$TEXT_FAILURE_BUILD" '''
-                }
-            }
+            cleanWs()
         }
     }
 }
