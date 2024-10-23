@@ -1,0 +1,21 @@
+_format_version: "3.0"
+_transform: true
+
+upstreams:
+  - name: api_upstream
+    targets:
+      - target: pyapi:8000
+        weight: 100
+      - target: pyapi_2:8000
+        weight: 100
+      - target: pyapi_3:8000
+        weight: 100
+
+services:
+  - name: api_service
+    url: http://api_upstream
+    routes:
+      - name: api_route
+        paths:
+          - /api
+        strip_path: true
