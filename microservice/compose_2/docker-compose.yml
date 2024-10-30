@@ -1,0 +1,47 @@
+services:
+  pyapip1:
+    container_name: pyapip1
+    image: api:penilaian
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+#    ports:
+#      - "8001:8000"
+    volumes:
+      - ./.env:/app/.env
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      default:
+         ipv4_address: 20.10.1.4
+  pyapip2:
+    container_name: pyapip2
+    image: api:penilaian
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+#    ports:
+#      - "8001:8000"
+    volumes:
+      - ./.env:/app/.env
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      default:
+         ipv4_address: 20.10.1.5
+networks:
+  default:
+    external: true
+    name: develop_net

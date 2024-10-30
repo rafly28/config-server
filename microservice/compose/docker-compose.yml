@@ -1,0 +1,47 @@
+services:
+  pyapik1:
+    container_name: pyapik1
+    image: api:karyawan
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+#    ports:
+#      - "8000:8000"
+    volumes:
+      - ./.env:/app/.env
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      default:
+         ipv4_address: 20.10.1.2
+  pyapik2:
+    container_name: pyapik2
+    image: api:karyawan
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+#    ports:
+#      - "8000:8000"
+    volumes:
+      - ./.env:/app/.env
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-size: "20m"
+        max-file: "5"
+    networks:
+      default:
+         ipv4_address: 20.10.1.3
+networks:
+  default:
+    external: true
+    name: develop_net

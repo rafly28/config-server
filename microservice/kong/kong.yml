@@ -1,0 +1,34 @@
+_format_version: "3.0"
+_transform: true
+
+upstreams:
+  - name: pyapik_upstream
+    targets:
+      - target: pyapik1:8000
+        weight: 100
+      - target: pyapik2:8000
+        weight: 100
+
+  - name: pyapip_upstream
+    targets:
+      - target: pyapip1:8000
+        weight: 100
+      - target: pyapip2:8000
+        weight: 100
+
+services:
+  - name: karyawan_service
+    url: http://pyapik_upstream
+    routes:
+      - name: karyawan_route
+        paths:
+          - /api/karyawan
+        strip_path: true
+
+  - name: penilaian_service
+    url: http://pyapip_upstream
+    routes:
+      - name: penilaian_route
+        paths:
+          - /api/penilaian
+        strip_path: true
